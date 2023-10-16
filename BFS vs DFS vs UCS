@@ -1,0 +1,267 @@
+
+from queue import Queue, LifoQueue
+import copy
+from queue import PriorityQueue
+
+# Used in Uniform Cost Search (UCS) to store states
+priority_queue = PriorityQueue()
+
+# Check if the number of inversion counts in the given grid is even (solvable)
+def is_solvable(grid):
+    flattened_grid = [num for row in grid for num in row if num != -1]
+    inversion_count = 0
+
+    for i in range(len(flattened_grid)):
+        for j in range(i + 1, len(flattened_grid)):
+            if flattened_grid[j] < flattened_grid[i]:
+                inversion_count += 1
+
+    return inversion_count % 2 == 0
+
+# Print the state of the grid
+def print_state(state):
+    for row in state:
+        print(row)
+    print()
+
+# Find the coordinates of the blank space in the puzzle
+def find_blank_coordinates(temp):
+    for i in range(3):
+        for j in range(3):
+            if temp[i][j] == -1:
+                return i, j
+
+target_state = [[1, 2, 3],
+                [4, 5, 6],
+                [7, 8, -1]]
+
+# Breadth-first search implemented using a FIFO queue data structure
+def bfs_search(initial_state, target_state):
+    queue = Queue()
+    queue.put(initial_state)
+    step = 0
+    visited = {}
+
+    while not queue.empty():
+        temp = queue.get()
+
+        if temp == target_state:
+            return step
+
+        state_tuple = tuple(map(tuple, temp))
+        if state_tuple not in visited.keys():
+            visited[state_tuple] = 1
+            step += 1
+            x, y = find_blank_coordinates(temp)
+
+            # Right check
+            if y < 2:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x][y+1] = temp2[x][y+1], temp2[x][y]
+                queue.put(temp2)
+
+            # Left check
+            if y > 0:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x][y-1] = temp2[x][y-1], temp2[x][y]
+                queue.put(temp2)
+
+            # Up check
+            if x > 0:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x-1][y] = temp2[x-1][y], temp2[x][y]
+                queue.put(temp2)
+
+            # Down check
+            if x < 2:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x+1][y] = temp2[x+1][y], temp2[x][y]
+                queue.put(temp2)
+
+    return -1
+
+# Depth-first search implemented using a stack data structure
+def dfs_search(initial_state, target_state):
+    stack = LifoQueue()
+    stack.put(initial_state)
+    step = 0
+    visited = {}
+
+    while not stack.empty():
+        temp = stack.get()
+
+        if temp == target_state:
+            return step
+
+        state_tuple = tuple(map(tuple, temp))
+        if state_tuple not in visited.keys():
+            visited[state_tuple] = 1
+            step += 1
+            x, y = find_blank_coordinates(temp)
+
+            # Right check
+            if y < 2:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x][y+1] = temp2[x][y+1], temp2[x][y]
+                stack.put(temp2)
+
+            # Left check
+            if y > 0:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x][y-1] = temp2[x][y-1], temp2[x][y]
+                stack.put(temp2)
+
+            # Up check
+            if x > 0:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x-1][y] = temp2[x-1][y], temp2[x][y]
+                stack.put(temp2)
+
+            # Down check
+            if x < 2:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x+1][y] = temp2[x+1][y], temp2[x][y]
+                stack.put(temp2)
+
+    return -1
+
+# Uniform Cost Search implemented using a min heap priority queue
+def ucs_search(initial_state, target_state):
+    priority_queue.put((0, initial_state))
+    step = 0
+    visited = {}
+
+    while not priority_queue.empty():
+        cost, temp = priority_queue.get()
+
+        if temp == target_state:
+            return step
+
+        state_tuple = tuple(map(tuple, temp))
+        if state_tuple not in visited.keys():
+            visited[state_tuple] = 1
+            step += 1
+            x, y = find_blank_coordinates(temp)
+
+            # Right check
+            if y < 2:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x][y+1] = temp2[x][y+1], temp2[x][y]
+                priority_queue.put((step, temp2))
+
+            # Left check
+            if y > 0:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x][y-1] = temp2[x][y-1], temp2[x][y]
+                priority_queue.put((step, temp2))
+
+            # Up check
+            if x > 0:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x-1][y] = temp2[x-1][y], temp2[x][y]
+                priority_queue.put((step, temp2))
+
+            # Down check
+            if x < 2:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x+1][y] = temp2[x+1][y], temp2[x][y]
+                priority_queue.put((step, temp2))
+
+    return -1
+
+# DFS implemented specially for Iterative Deepening Search
+def depth_limited_dfs(initial_state, target_state, limit):
+    stack = LifoQueue()
+    stack.put((initial_state, 0))
+    step = 0
+    visited = {}
+
+    while not stack.empty():
+        temp, depth = stack.get()
+
+        if temp == target_state:
+            return 1, step
+
+        state_tuple = tuple(map(tuple, temp))
+        if state_tuple not in visited.keys():
+            visited[state_tuple] = 1
+            step += 1
+            x, y = find_blank_coordinates(temp)
+
+            # Right check
+            if y < 2:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x][y+1] = temp2[x][y+1], temp2[x][y]
+                if depth <= limit:
+                    stack.put((temp2, depth + 1))
+
+            # Left check
+            if y > 0:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x][y-1] = temp2[x][y-1], temp2[x][y]
+                if depth <= limit:
+                    stack.put((temp2, depth + 1))
+
+            # Up check
+            if x > 0:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x-1][y] = temp2[x-1][y], temp2[x][y]
+                if depth <= limit:
+                    stack.put((temp2, depth + 1))
+
+            # Down check
+            if x < 2:
+                temp2 = copy.deepcopy(temp)
+                temp2[x][y], temp2[x+1][y] = temp2[x+1][y], temp2[x][y]
+                if depth <= limit:
+                    stack.put((temp2, depth + 1))
+
+    return -1, step
+
+# Iterative Deepening Search (IDS)
+def iterative_deepening_search(initial_state, target_state):
+    depth_limit = 0
+    ids_count = 0
+
+    while True:
+        dfs_result, dfs_count = depth_limited_dfs(initial_state, target_state, depth_limit)
+        ids_count += dfs_count
+        if dfs_result == 1:
+            break
+        depth_limit += 1
+    return ids_count
+
+# Main program
+print("Enter Initial State:")
+initial_state = []
+print("Enter 1 for the sample grid.\nEnter 2 for user input.")
+choice = int(input("Enter your choice: "))
+
+if choice == 2:
+    for i in range(1, 4):
+        print("Enter row", i, ":", end=" ")
+        initial_state.append(list(map(int, input().split())))
+else:
+    initial_state = [[3, 2, 1],
+                     [4, 5, 6],
+                     [8, 7, -1]]
+
+print("\n-------Initial State-------\n")
+print_state(initial_state)
+print("-------Target State-------\n")
+print_state(target_state)
+
+if is_solvable(initial_state):
+    bfs_count = bfs_search(initial_state, target_state)
+    print("Problem solved with BFS in", bfs_count, "steps")
+
+    dfs_count = dfs_search(initial_state, target_state)
+    print("\nProblem solved with DFS in", dfs_count, "steps")
+
+    ucs_count = ucs_search(initial_state, target_state)
+    print("\nProblem solved with UCS in", ucs_count, "steps")
+
+    ids_count = iterative_deepening_search(initial_state, target_state)
+    print("\nProblem solved with IDS in", ids_count, "steps\n")
+else:
+    print("\nProblem cannot be solved\n")
