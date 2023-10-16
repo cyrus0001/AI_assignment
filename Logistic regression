@@ -1,0 +1,52 @@
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+# Function to load data
+def load_data(train_path, test_path):
+    train_data = pd.read_csv(train_path)
+    test_data = pd.read_csv(test_path)
+    return train_data, test_data
+
+# Function to preprocess data
+def preprocess_data(train_data, test_data):
+    X_train = train_data.drop('label', axis=1)
+    y_train = train_data['label']
+    X_test = test_data.drop('label', axis=1)
+    y_test = test_data['label']
+    return X_train, y_train, X_test, y_test
+
+# Function to train model
+def train_model(X_train, y_train):
+    model = LogisticRegression(max_iter=1000)
+    model.fit(X_train, y_train)
+    return model
+
+# Function to make predictions and evaluate the model
+def evaluate_model(model, X_test, y_test):
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    report = classification_report(y_test, y_pred)
+    return accuracy, report
+
+# Paths for dataset
+training_path = "C:\\Users\\ASHU\\Desktop\\AI_assgn_8\\mnist_train.csv"
+testing_path = "C:\\Users\\ASHU\\Desktop\\AI_assgn_8\\mnist_test.csv"
+
+# Load data
+train_data, test_data = load_data(training_path, testing_path)
+
+# Preprocess data
+X_train, y_train, X_test, y_test = preprocess_data(train_data, test_data)
+
+# Train the model
+model = train_model(X_train, y_train)
+
+# Evaluate the model
+accuracy, report = evaluate_model(model, X_test, y_test)
+
+# Print results
+print(f'Accuracy: {accuracy}')
+print(report)
